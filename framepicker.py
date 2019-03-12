@@ -37,7 +37,7 @@ class Framepicker:
 
         return False
 
-    #Picks frames from the video at intervals given
+    #Picks frames from the video at given intervals
     def pickframes(self, interval):
         #First loop through the number of sections specified in the metadata
         for section in range(len(self.metadata)):
@@ -60,5 +60,5 @@ class Framepicker:
 
 x = Framepicker()
 x.loadmetadata()
-if x.loadvideo("test.mp4"):
+if x.loadvideo("Wildlife.wmv"):
     x.pickframes(200)
