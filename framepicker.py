@@ -17,8 +17,8 @@ class Framepicker:
 
     #Dummy function for loading metadata
     def loadmetadata(self):
-        self.metadata.append((500, 1000))
-        self.metadata.append((1500, 2000))
+        self.metadata.append((100, 300, "frame"))
+        self.metadata.append((20000, 25000, "msec"))
 
     #Loads the video and stores the video info
     def loadvideo(self, filename=None, video=None, vidname="video"):
@@ -35,8 +35,8 @@ class Framepicker:
                 "height" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
                 "fps" : int(self.vidcap.get(cv2.CAP_PROP_FPS)),
                 "totalframes" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)),
-                "length" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) #Calculate length of the video in seconds
-                           / int(self.vidcap.get(cv2.CAP_PROP_FPS))
+                "length" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) #Calculate length of the video in milliseconds
+                           / int(self.vidcap.get(cv2.CAP_PROP_FPS)) * 1000
             }
             return True
         return False
@@ -46,7 +46,15 @@ class Framepicker:
         #First loop through the number of sections specified in the metadata
         for section in range(len(self.metadata)):
             #Then loop through each section with a step value of the interval given
-            for i in range(self.metadata[section][0], self.metadata[section][1], interval):
+
+            if self.metadata[section][2] == "msec":
+                startframe = int(self.metadata[section][0] * self.vidinfo["fps"] / 1000)
+                endframe = int(self.metadata[section][1] * self.vidinfo["fps"] / 1000)
+            else:
+                startframe = self.metadata[section][0]
+                endframe = self.metadata[section][1]
+
+            for i in range(startframe, endframe, interval):
                 self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = self.vidcap.read()
 
@@ -65,9 +73,7 @@ class Framepicker:
 #Test
 x = Framepicker()
 x.loadmetadata()
-<<<<<<< HEAD
 if x.loadvideo("Wildlife.wmv"):
-=======
-if x.loadvideo(filename="bdo.mp4"):
->>>>>>> c865fdb5c3fe059f0fa051440b14bfb0759bdd3f
-    x.pickframes(200)
+    print(x.vidinfo["totalframes"])
+    print(x.vidinfo["length"])
+    x.pickframes(50)
