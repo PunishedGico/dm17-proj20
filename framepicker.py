@@ -1,11 +1,12 @@
 import cv2
-import numpy as np
 
-#Class that handles loading video, selecting frames,
+#Class that handles video loading, selecting frames,
 # and saving them as separate images in disk
 class Framepicker:
     def __init__(self):
         self.vidcap = None
+        self.dir = "output/" #Output folder, needs to make sure it exists
+        self.vidname = ""
         self.imex = "jpg" #Extension of the images being saved
         self.vidinfo = {} #Dictionary containing data about the video
         self.metadata = [] #List of tuples marking sections to work on
@@ -16,13 +17,17 @@ class Framepicker:
 
     #Dummy function for loading metadata
     def loadmetadata(self):
-        for i in range(1):
-            self.metadata.append((500, 1000))
-            self.metadata.append((1500, 2000))
+        self.metadata.append((500, 1000))
+        self.metadata.append((1500, 2000))
 
     #Loads the video and stores the video info
-    def loadvideo(self, filename):
-        self.vidcap = cv2.VideoCapture(filename)
+    def loadvideo(self, filename=None, video=None, vidname="video"):
+        if filename is not None:
+            self.vidcap = cv2.VideoCapture(filename)
+            self.vidname = filename.split(".")[0]
+        else:
+            self.vidcap = video
+            self.vidname = vidname
 
         if self.vidcap.isOpened():
             self.vidinfo = {
@@ -34,7 +39,6 @@ class Framepicker:
                            / int(self.vidcap.get(cv2.CAP_PROP_FPS))
             }
             return True
-
         return False
 
     #Picks frames from the video at given intervals
@@ -48,7 +52,7 @@ class Framepicker:
 
                 if self.analyseframe(frame):
                     print("Saving frame: " + str(i))
-                    self.saveframe(frame, "test" + str(i) + "." + self.imex)
+                    self.saveframe(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
 
     #Dummy function for analysing a frame and determining if it's worth saving
     def analyseframe(self, frame):
@@ -56,9 +60,14 @@ class Framepicker:
 
     #Saves a single frame to disk
     def saveframe(self, frame, filename):
-        cv2.imwrite(filename, frame)
+        cv2.imwrite(self.dir + filename, frame)
 
+#Test
 x = Framepicker()
 x.loadmetadata()
+<<<<<<< HEAD
 if x.loadvideo("Wildlife.wmv"):
+=======
+if x.loadvideo(filename="bdo.mp4"):
+>>>>>>> c865fdb5c3fe059f0fa051440b14bfb0759bdd3f
     x.pickframes(200)
