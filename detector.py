@@ -1,31 +1,13 @@
-import numpy as np
-import tensorflow as tf
+from inference_base import *
 
-from object_detection.utils import ops as utils_ops
-from utils import label_map_util
-from utils import visualization_utils as vis_util
-
-class Detector:
+class Detector(InferenceBase):
     def __init__(self):
+        super().__init__()
         self.graph_name = "l_frozen_inference_graph.pb"
         self.label_name = "l_label_map.pbtxt"
 
-        self.detection_graph = tf.Graph()
-        self.category_index = None
-
-    def load_graph(self, filename):
-        with self.detection_graph.as_default():
-            od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile(filename, "rb") as fid:
-                serialized_graph = fid.read()
-                od_graph_def.ParseFromString(serialized_graph)
-                tf.import_graph_def(od_graph_def, name="")
-
-    def load_labels(self, filename):
-        self.category_index = label_map_util.create_category_index_from_labelmap(filename, use_display_name=True)
-
     def run_inference(self, image):
-        with self.detection_graph.as_default():
+        with self.inference_graph.as_default():
             with tf.Session() as sess:
                 ops = tf.get_default_graph().get_operations()
                 all_tensor_names = {output.name for op in ops for output in op.outputs}
@@ -42,7 +24,7 @@ class Detector:
                     real_num_detection = tf.cast(tensor_dict["numb_detections"][0], tf.int32)
                     detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
                     detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
-                    detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, frame.shape[0], frame.shape[1])
+                    detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, image.shape[0], image.shape[1])
                     detection_masks_reframed = tf.cast(tf.greater(detection_masks_reframed, 0.5), tf.uint8)
                     tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
                 
@@ -67,3 +49,4 @@ class Detector:
                 instance_masks=output_dict.get("detection_masks"),
                 use_normalized_coordinates=True,
                 line_thickness=8)
+        return True
