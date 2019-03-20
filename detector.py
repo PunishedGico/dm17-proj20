@@ -39,7 +39,7 @@ class Detector(InferenceBase):
 
                 if "detection_masks" in output_dict:
                     output_dict["detection_masks"] = output_dict["detection_masks"][0]
-            
+
             vis_util.visualize_boxes_and_labels_on_image_array(
                 image,
                 output_dict["detection_boxes"],
