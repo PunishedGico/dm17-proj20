@@ -14,20 +14,21 @@ class Framepicker:
 
     #Dummy function for loading metadata
     def load_metadata(self):
-        self.metadata.append((38000, 87000, "msec"))
+        self.metadata.append((57000, 210000, "msec"))
 
     #Loads the video and stores the video info
     def load_video(self, filename=None, video=None, vidname="video"):
         #Determine if video needs to be loaded or is passed
         if filename is not None:
             self.vidcap = cv2.VideoCapture(filename)
-            #Isolate filename from path and extension (junk, redo)
+            #Isolate filename from path and extension (COMPLETE junk, redo)
             filename = filename.split(".")[0]
-            self.vidname = filename.split("/")[1]
+            self.vidname = filename.split("/")[2]
         else:
             self.vidcap = video
             self.vidname = vidname
 
+        #Store info about the video
         if self.vidcap.isOpened():
             self.vidinfo = {
                 "width" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -57,25 +58,22 @@ class Framepicker:
                 self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = self.vidcap.read()
 
-                if infer.run_inference(frame):
+                #Determine if the frame is of interest
+                if True:
                     print("Saving frame: " + str(i))
+                    #Save frame
                     self.save_frame(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
-
-    # ???
-    def analyse_frame(self, frame):
-        return True
 
     #Saves a single frame to disk
     def save_frame(self, frame, filename):
         cv2.imwrite(self.dir + filename, frame)
 
 #Test
-
 d = Detector()
 d.load_graph(d.graph_name)
 d.load_labels(d.label_name)
 
 x = Framepicker()
 x.load_metadata()
-if x.load_video("Test data/621982f28ad947308051d07c3e4d0df4.mp4"):
-    x.pick_frames(60, d)
+if x.load_video("Test data/Docks/eb2c38d59083492baf6603552fc46623 (1).mp4"):
+    x.pick_frames(60)
