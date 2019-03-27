@@ -1,4 +1,5 @@
 from inference_base import *
+from metrics import Metrics
 
 class Detector(InferenceBase):
     def __init__(self):
@@ -39,6 +40,13 @@ class Detector(InferenceBase):
 
                 if "detection_masks" in output_dict:
                     output_dict["detection_masks"] = output_dict["detection_masks"][0]
+            
+            return_metrics = Metrics()
+            #Temporary? metric code
+            for idx, detection in enumerate(output_dict["detection_scores"]):
+                if detection > 0.5:
+                    det_class = output_dict["detection_classes"][idx]
+                    return_metrics.add(self.category_index.get(det_class)["name"])
 
             vis_util.visualize_boxes_and_labels_on_image_array(
                 image,
@@ -48,5 +56,5 @@ class Detector(InferenceBase):
                 self.category_index,
                 instance_masks=output_dict.get("detection_masks"),
                 use_normalized_coordinates=True,
-                line_thickness=8)
-        return True
+                line_thickness=4)
+        return return_metrics
