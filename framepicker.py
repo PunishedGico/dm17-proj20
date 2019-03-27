@@ -14,7 +14,7 @@ class Framepicker:
 
     #Dummy function for loading metadata
     def load_metadata(self):
-        self.metadata.append((38000, 87000, "msec"))
+        self.metadata.append((60000, 200000, "msec"))
 
     #Loads the video and stores the video info
     def load_video(self, filename=None, video=None, vidname="video"):
@@ -77,5 +77,5 @@ d.load_labels(d.label_name)
 
 x = Framepicker()
 x.load_metadata()
-if x.load_video("Test data/621982f28ad947308051d07c3e4d0df4.mp4"):
-    x.pick_frames(60, d)
+if x.load_video("Test data/6b009e8cefb04eb9aad772479f9f649a.mp4"):
+    x.pick_frames(30, d)

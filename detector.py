@@ -3,8 +3,8 @@ from inference_base import *
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
-        self.graph_name = "l_frozen_inference_graph.pb"
-        self.label_name = "l_label_map.pbtxt"
+        self.graph_name = "m_frozen_inference_graph.pb"
+        self.label_name = "m_label_map.pbtxt"
 
     def run_inference(self, image):
         with self.inference_graph.as_default():
