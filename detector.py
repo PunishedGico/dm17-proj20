@@ -4,7 +4,7 @@ from metrics import Metrics
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
-        self.graph_name = "m_frozen_inference_graph.pb"
+        self.graph_name = "24b32641s.pb"
         self.label_name = "m_label_map.pbtxt"
 
     def run_inference(self, image):
@@ -41,12 +41,16 @@ class Detector(InferenceBase):
                 if "detection_masks" in output_dict:
                     output_dict["detection_masks"] = output_dict["detection_masks"][0]
             
-            return_metrics = Metrics()
+            detections = {}
             #Temporary? metric code
             for idx, detection in enumerate(output_dict["detection_scores"]):
                 if detection > 0.5:
                     det_class = output_dict["detection_classes"][idx]
-                    return_metrics.add(self.category_index.get(det_class)["name"])
+                    det_name = self.category_index.get(det_class)["name"]
+                    if det_name not in detections:
+                        detections[det_name] = 1
+                    else:
+                        detections[det_name] += 1
 
             vis_util.visualize_boxes_and_labels_on_image_array(
                 image,
@@ -57,4 +61,4 @@ class Detector(InferenceBase):
                 instance_masks=output_dict.get("detection_masks"),
                 use_normalized_coordinates=True,
                 line_thickness=4)
-        return return_metrics
+        return detections
