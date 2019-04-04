@@ -2,6 +2,9 @@ import cv2
 from detector import Detector
 from metrics import Metrics
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 #Class that handles video loading, selecting frames,
 # and saving them as separate images in disk
 class Framepicker:
@@ -70,14 +73,17 @@ class Framepicker:
                 #Determine if the frame is of interest ????
                 res = infer.run_inference(frame)
                 print("Saving frame: " + str(i))
-                metric.merge(res)
-                print(metric)
+                metric.add_detection(i, res)
+
+                #print(metric)
                 #if res
                 #Save frame
                 self.save_frame(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
 
         print("Final:")
-        print(metric)
+        print(metric.frames)
+        metric.add_visualisation(self.dir + self.vidname + "-frame-", self.vidinfo["totalframes"], interval)
+        
 
     #Saves a single frame to disk
     def save_frame(self, frame, filename):
