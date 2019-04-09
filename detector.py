@@ -1,11 +1,62 @@
 from inference_base import *
 from metrics import Metrics
+import time
 
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
         self.graph_name = "24b32641s.pb"
         self.label_name = "m_label_map.pbtxt"
+
+    def setup_session(self):
+        with self.inference_graph.as_default():
+            self.sess = tf.Session()
+
+            ops = tf.get_default_graph().get_operations()
+            all_tensor_names = {output.name for op in ops for output in op.outputs}
+            self.tensor_dict = {}
+            for key in ["num_detections", "detection_boxes", "detection_scores", "detection_classes", "detection_masks"]:
+                tensor_name = key + ":0"
+                if tensor_name in all_tensor_names:
+                    self.tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
+            
+            self.image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
+    
+    def close_session(self):
+        self.sess.close()
+
+    def new_run(self, image):
+        output_dict = self.sess.run(self.tensor_dict, feed_dict={self.image_tensor: np.expand_dims(image, 0)})
+
+        output_dict["num_detection"] = int(output_dict["num_detections"][0])
+        output_dict["detection_classes"] = output_dict["detection_classes"][0].astype(np.uint8)
+        output_dict["detection_boxes"] = output_dict["detection_boxes"][0]
+        output_dict["detection_scores"] = output_dict["detection_scores"][0]
+
+        if "detection_masks" in output_dict:
+            output_dict["detection_masks"] = output_dict["detection_masks"][0]
+
+        detections = {}
+        #Temporary? metric code
+        for idx, detection in enumerate(output_dict["detection_scores"]):
+            if detection > 0.5:
+                det_class = output_dict["detection_classes"][idx]
+                det_name = self.category_index.get(det_class)["name"]
+                if det_name not in detections:
+                    detections[det_name] = 1
+                else:
+                    detections[det_name] += 1
+
+        vis_util.visualize_boxes_and_labels_on_image_array(
+            image,
+            output_dict["detection_boxes"],
+            output_dict["detection_classes"],
+            output_dict["detection_scores"],
+            self.category_index,
+            instance_masks=output_dict.get("detection_masks"),
+            use_normalized_coordinates=True,
+            line_thickness=4)
+        return detections
 
     def run_inference(self, image):
         with self.inference_graph.as_default():
@@ -30,8 +81,11 @@ class Detector(InferenceBase):
                     tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
                 
                 image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
-
+                
+                print("Start test")
+                tim = time.perf_counter_ns()
                 output_dict = sess.run(tensor_dict, feed_dict={image_tensor: np.expand_dims(image, 0)})
+                print("Test: " + str((time.perf_counter_ns() - tim) / 1000000))
 
                 output_dict["num_detection"] = int(output_dict["num_detections"][0])
                 output_dict["detection_classes"] = output_dict["detection_classes"][0].astype(np.uint8)

@@ -5,8 +5,8 @@ class Classifier:
         super().__init__()
         self.graph_name = "x.pb"
 
-    def load_graph(self)
+    def load_graph(self):
         pass
 
-    def run_inference(self, image)
+    def run_inference(self, image):
         pass
