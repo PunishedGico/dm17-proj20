@@ -65,13 +65,15 @@ class Framepicker:
                 startframe = self.metadata[section][0]
                 endframe = self.metadata[section][1]
 
+            infer.setup_session()
             #Then loop through each section with a step value of the interval given
             for i in range(startframe, endframe, interval):
                 self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = self.vidcap.read()
 
                 #Determine if the frame is of interest ????
-                res = infer.run_inference(frame)
+                #res = infer.run_inference(frame)
+                res = infer.new_run(frame)
                 print("Saving frame: " + str(i))
                 metric.add_detection(i, res)
 
@@ -79,12 +81,12 @@ class Framepicker:
                 #if res
                 #Save frame
                 self.save_frame(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
-
+        
+        infer.close_session()
         print("Final:")
         print(metric.frames)
-        metric.add_visualisation(self.dir + self.vidname + "-frame-", self.vidinfo["totalframes"], interval)
+        metric.add_visualisation(self.dir + self.vidname + "-frame-", interval, self.vidinfo)
         
-
     #Saves a single frame to disk
     def save_frame(self, frame, filename):
         cv2.imwrite(self.dir + filename, frame)
@@ -96,11 +98,21 @@ d.load_labels(d.label_name)
 
 x = Framepicker()
 x.load_metadata()
-if x.load_video("Test data/Docks/6b009e8cefb04eb9aad772479f9f649a.mp4"):
+if x.load_video("Test data/Relevance test/relevant.mp4"):
+    x.pick_frames(1, d)
+
+"""
+#Big test
+
+d = Detector()
+d.load_graph(d.graph_name)
+d.load_labels(d.label_name)
+
+x = Framepicker()
+x.load_metadata()
+if x.load_video("Test data/Relevance test/maybe_relevant.mp4"):
     x.pick_frames(24, d)
 
-#Big test
-"""
 d = Detector()
 d.load_graph(d.graph_name)
 d.load_labels(d.label_name)
