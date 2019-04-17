@@ -29,16 +29,16 @@ class Metrics:
         
         for frame in self.frames:
             for key, value in frame.items():
-                if "Bollard" in frame and frame["Bollard"] > 0:
+                if "bollard" in frame and frame["bollard"] > 0:
                     cv2.rectangle(img, (frame["frame_num"],0), (frame["frame_num"]+interval,8), (125,255,0,255), -1)
                 
-                if "Ladder" in frame and frame["Ladder"] > 0:
+                if "ladder" in frame and frame["ladder"] > 0:
                     cv2.rectangle(img, (frame["frame_num"],10), (frame["frame_num"]+interval,18), (0,252,252,255), -1)
                 
-                if "Broken wood" in frame and frame["Broken wood"] > 0:
+                if "broken wood" in frame and frame["broken wood"] > 0:
                     cv2.rectangle(img, (frame["frame_num"],20), (frame["frame_num"]+interval,28), (131,255,217,255), -1)
                 
-                if "Rope" in frame and frame["Rope"] > 0:
+                if "rope" in frame and frame["rope"] > 0:
                     cv2.rectangle(img, (frame["frame_num"],30), (frame["frame_num"]+interval,38), (239,255,254,255), -1)
 
         asd = cv2.resize(img, (vidinfo["width"], 40))

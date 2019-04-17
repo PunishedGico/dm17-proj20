@@ -5,8 +5,8 @@ import time
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
-        self.graph_name = "24b32641s.pb"
-        self.label_name = "m_label_map.pbtxt"
+        self.graph_name = "mask_rcnn.pb"
+        self.label_name = "mask_rcnn.pbtxt"
 
     def setup_session(self):
         with self.inference_graph.as_default():
@@ -19,23 +19,36 @@ class Detector(InferenceBase):
                 tensor_name = key + ":0"
                 if tensor_name in all_tensor_names:
                     self.tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
+
+            if "detection_masks" in self.tensor_dict:
+                detection_boxes = tf.squeeze(self.tensor_dict["detection_boxes"], [0])
+                detection_masks = tf.squeeze(self.tensor_dict["detection_masks"], [0])
+
+                real_num_detection = tf.cast(self.tensor_dict["num_detections"][0], tf.int32)
+                detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
+                detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
+                detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, 1080, 1920)
+                detection_masks_reframed = tf.cast(tf.greater(detection_masks_reframed, 0.5), tf.uint8)
             
+            self.tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
+
             self.image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
     
     def close_session(self):
         self.sess.close()
 
     def new_run(self, image):
+                
         output_dict = self.sess.run(self.tensor_dict, feed_dict={self.image_tensor: np.expand_dims(image, 0)})
 
         output_dict["num_detection"] = int(output_dict["num_detections"][0])
         output_dict["detection_classes"] = output_dict["detection_classes"][0].astype(np.uint8)
         output_dict["detection_boxes"] = output_dict["detection_boxes"][0]
         output_dict["detection_scores"] = output_dict["detection_scores"][0]
-
+        
         if "detection_masks" in output_dict:
             output_dict["detection_masks"] = output_dict["detection_masks"][0]
-
+        
         detections = {}
         #Temporary? metric code
         for idx, detection in enumerate(output_dict["detection_scores"]):
@@ -73,7 +86,7 @@ class Detector(InferenceBase):
                     detection_boxes = tf.squeeze(tensor_dict["detection_boxes"], [0])
                     detection_masks = tf.squeeze(tensor_dict["detection_masks"], [0])
 
-                    real_num_detection = tf.cast(tensor_dict["numb_detections"][0], tf.int32)
+                    real_num_detection = tf.cast(tensor_dict["num_detections"][0], tf.int32)
                     detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
                     detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
                     detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, image.shape[0], image.shape[1])
