@@ -1,6 +1,6 @@
 from inference_base import *
 from metrics import Metrics
-import time
+import cv2
 
 class Detector(InferenceBase):
     def __init__(self):
@@ -33,26 +33,27 @@ class Detector(InferenceBase):
             self.tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
 
             self.image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
-    
+
     def close_session(self):
         self.sess.close()
 
     def new_run(self, image):
-                
         output_dict = self.sess.run(self.tensor_dict, feed_dict={self.image_tensor: np.expand_dims(image, 0)})
 
-        output_dict["num_detection"] = int(output_dict["num_detections"][0])
+        output_dict["num_detections"] = int(output_dict["num_detections"][0])
         output_dict["detection_classes"] = output_dict["detection_classes"][0].astype(np.uint8)
         output_dict["detection_boxes"] = output_dict["detection_boxes"][0]
         output_dict["detection_scores"] = output_dict["detection_scores"][0]
-        
+
         if "detection_masks" in output_dict:
             output_dict["detection_masks"] = output_dict["detection_masks"][0]
-        
+
         detections = {}
+        total_d = 0
         #Temporary? metric code
         for idx, detection in enumerate(output_dict["detection_scores"]):
             if detection > 0.5:
+                total_d += 1
                 det_class = output_dict["detection_classes"][idx]
                 det_name = self.category_index.get(det_class)["name"]
                 if det_name not in detections:
@@ -60,15 +61,26 @@ class Detector(InferenceBase):
                 else:
                     detections[det_name] += 1
 
+        print("total_d: " + str(total_d))
+        for i in range(0, total_d):
+            cv2.imwrite("output/" + str(i) + "-mask.png", output_dict["detection_masks"][i])
+
+        m = output_dict.pop("detection_masks")
+        np.save("output/test.npy", output_dict)
+        #np.save("output/mask.npy", m)
+
+        asd = np.load("output/test.npy")
+
         vis_util.visualize_boxes_and_labels_on_image_array(
             image,
-            output_dict["detection_boxes"],
-            output_dict["detection_classes"],
-            output_dict["detection_scores"],
+            asd.item().get("detection_boxes"),
+            asd.item().get("detection_classes"),
+            asd.item().get("detection_scores"),
             self.category_index,
-            instance_masks=output_dict.get("detection_masks"),
+            instance_masks=asd.item().get("detection_masks"),
             use_normalized_coordinates=True,
             line_thickness=4)
+
         return detections
 
     def run_inference(self, image):
@@ -95,12 +107,9 @@ class Detector(InferenceBase):
                 
                 image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
                 
-                print("Start test")
-                tim = time.perf_counter_ns()
                 output_dict = sess.run(tensor_dict, feed_dict={image_tensor: np.expand_dims(image, 0)})
-                print("Test: " + str((time.perf_counter_ns() - tim) / 1000000))
 
-                output_dict["num_detection"] = int(output_dict["num_detections"][0])
+                output_dict["num_detections"] = int(output_dict["num_detections"][0])
                 output_dict["detection_classes"] = output_dict["detection_classes"][0].astype(np.uint8)
                 output_dict["detection_boxes"] = output_dict["detection_boxes"][0]
                 output_dict["detection_scores"] = output_dict["detection_scores"][0]
