@@ -3,7 +3,6 @@ import tensorflow as tf
 
 from object_detection.utils import ops as utils_ops
 from utils import label_map_util
-from utils import visualization_utils as vis_util
 
 class InferenceBase():
     def __init__(self):
