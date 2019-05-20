@@ -2,6 +2,7 @@ import jwt
 import json
 import requests
 import time
+import os
 
 class Alan():
     def __init__(self):
@@ -44,12 +45,19 @@ class Alan():
             print("Error:" + r.status_code)
             return None
 
-    def download_video(self, url):
-        r = requests.get(url, self.create_jwt())
+    def download_video(self, url, force=False):
+        if os.path.isfile("Test Data/Alan/" + url.split("/")[-1]) is False or force is True:
+            print("Downloading: " + url)
+            r = requests.get(url, self.create_jwt())
 
-        if r.status_code == 200:
-            filename = url.split("/")[-1]
-            with open("Test Data/Alan/" + filename, "wb") as f:
-                f.write(r.content)
+            if r.status_code == 200:
+                filename = url.split("/")[-1]
+                with open("Test Data/Alan/" + filename, "wb") as f:
+                    f.write(r.content)
+                
+                return "Test Data/Alan/" + filename
+            else:
+                print("Error:" + r.status_code)
+                return None
         else:
-            print("Error:" + r.status_code)
+            return "Test Data/Alan/" + url.split("/")[-1]
