@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from detector import Detector
 from metrics import Metrics
 
@@ -47,7 +48,7 @@ class Framepicker:
                 "length" : int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) #Calculate length of the video in milliseconds
                            / int(self.vidcap.get(cv2.CAP_PROP_FPS)) * 1000
             }
-            self.metadata.append((4000, self.vidinfo["totalframes"], "f"))
+            self.metadata.append((0, self.vidinfo["totalframes"], "f"))
             #self.metadata.append((4000, 5000, "f"))
             return True
         return False
@@ -65,31 +66,49 @@ class Framepicker:
                 startframe = self.metadata[section][0]
                 endframe = self.metadata[section][1]
 
-            infer.setup_session()
+            infer.setup_session(self.vidinfo)
             #Then loop through each section with a step value of the interval given
             for i in range(startframe, endframe, interval):
                 self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, i)
                 ret, frame = self.vidcap.read()
 
-                #Determine if the frame is of interest ????
-                #res = infer.run_inference(frame)
-                res = infer.new_run(frame)
+                output_dict = infer.new_run(frame)
                 print("Saving frame: " + str(i))
-                metric.add_detection(i, res)
+                #print(output_dict)
+                
+                detections = {}
+                total_d = 0
+                #Temporary? metric code
+                for idx, detection in enumerate(output_dict["detection_scores"]):
+                    if detection > 0.5:
+                        total_d += 1
+                        det_class = output_dict["detection_classes"][idx]
+                        det_name = infer.category_index.get(det_class)["name"]
+                        if det_name not in detections:
+                            detections[det_name] = 1
+                        else:
+                            detections[det_name] += 1
+                
+                metric.add_detection(i, detections)
 
-                #print(metric)
-                #if res
-                #Save frame
+                self.save_data(output_dict, self.vidname + "-frame-" + str(i) + ".npy", total_d)
+
                 self.save_frame(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
         
         infer.close_session()
         print("Final:")
         print(metric.frames)
-        metric.add_visualisation(self.dir + self.vidname + "-frame-", interval, self.vidinfo)
+        metric.add_visualisation(self.dir + self.vidname + "-frame-", interval, self.vidinfo, infer.category_index)
         
     #Saves a single frame to disk
     def save_frame(self, frame, filename):
         cv2.imwrite(self.dir + filename, frame)
+
+    def save_data(self, dic, filename, total_d):
+        m = dic.pop("detection_masks")
+        eh = m[0:total_d]
+        dic["detection_masks"] = eh
+        np.save(self.dir + filename, dic)
 
 #Test
 d = Detector()
@@ -99,7 +118,7 @@ d.load_labels(d.label_name)
 x = Framepicker()
 x.load_metadata()
 if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(8000, d)
+    x.pick_frames(1920, d)
 
 """
 #Big test
