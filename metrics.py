@@ -67,9 +67,8 @@ class Metrics:
             img = cv2.imread(f)
 
             output_dict = self.load_data(filename, pos)
-            self.draw_boxes(img, output_dict)
-
-            """
+            #self.draw_boxes(img, output_dict)
+            
             vis_util.visualize_boxes_and_labels_on_image_array(
                 img,
                 output_dict.item().get("detection_boxes"),
@@ -79,7 +78,7 @@ class Metrics:
                 instance_masks=output_dict.item().get("detection_masks"),
                 use_normalized_coordinates=True,
                 line_thickness=4)
-            """
+            
             img[h-40:h, 0:0+w] = vis
             cv2.line(img, (asd,h-40), (asd,h), (0,0,255), 1)
             cv2.imwrite(f, img)
