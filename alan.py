@@ -3,50 +3,53 @@ import json
 import requests
 import time
 
-with open("url", "r") as f:
-    url = f.read()
+class Alan():
+    def __init__(self):
+        self.url = ""
+        self.secret = ""
 
-with open("secret", "r") as f:
-    secret = f.read()
+        with open("url", "r") as f:
+            self.url = f.read()
+        
+        with open("secret", "r") as f:
+            self.secret = f.read()
 
-flightId = 0
+    def create_jwt(self):
+        claims = {
+            "iss" : "test",
+            "exp" : int(time.time()) + 3600
+        }
 
-claims = {
-    "iss" : "test",
-    "exp" : int(time.time()) + 3600
-}
+        token = jwt.encode(claims, self.secret, "HS256")
 
-token = jwt.encode(claims, secret, "HS256")
+        stuff = {
+            "system" : "test",
+            "token" : token.decode("utf-8")
+        }
 
-stuff = {
-    "system" : "test",
-    "token" : token.decode("utf-8")
-}
+        return stuff
 
-r = requests.get(url + "go/getAllVideos", stuff)
+    def get_all_videos(self):
+        r = requests.get(self.url + "go/getAllVideos", self.create_jwt())
 
-print(r.url)
-print(r.status_code)
-print(r.content)
+        if r.status_code == 200:
+            json_data = json.loads(r.text)
 
-"https://test-hive-rt.lorenztechnology.com/go/downloadvideo/03137efe91ed4a6d967829bb07786505.mp4"
+            return_list = []
+            for p in json_data:
+                return_list.append(p["path"])
 
-claims = {
-    "iss" : "test",
-    "exp" : int(time.time()) + 3600
-}
+            return return_list
+        else:
+            print("Error:" + r.status_code)
+            return None
 
-token = jwt.encode(claims, secret, "HS256")
+    def download_video(self, url):
+        r = requests.get(url, self.create_jwt())
 
-stuff = {
-    "system" : "test",
-    "token" : token.decode("utf-8")
-}
-
-r = requests.get("https://test-hive-rt.lorenztechnology.com/go/downloadvideo/03137efe91ed4a6d967829bb07786505.mp4", stuff)
-
-print(r.url)
-print(r.status_code)
-
-with open("alan.mp4", "wb") as f:
-    f.write(r.content)
+        if r.status_code == 200:
+            filename = url.split("/")[-1]
+            with open("Test Data/Alan/" + filename, "wb") as f:
+                f.write(r.content)
+        else:
+            print("Error:" + r.status_code)
