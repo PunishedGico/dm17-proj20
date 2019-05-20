@@ -5,10 +5,10 @@ import cv2
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
-        self.graph_name = "mask_rcnn.pb"
+        self.graph_name = "nmask.pb"
         self.label_name = "mask_rcnn.pbtxt"
 
-    def setup_session(self):
+    def setup_session(self, vidinfo):
         with self.inference_graph.as_default():
             self.sess = tf.Session()
 
@@ -27,10 +27,10 @@ class Detector(InferenceBase):
                 real_num_detection = tf.cast(self.tensor_dict["num_detections"][0], tf.int32)
                 detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
                 detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
-                detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, 1080, 1920)
+                detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(detection_masks, detection_boxes, vidinfo["height"], vidinfo["width"])
                 detection_masks_reframed = tf.cast(tf.greater(detection_masks_reframed, 0.5), tf.uint8)
             
-            self.tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
+                self.tensor_dict["detection_masks"] = tf.expand_dims(detection_masks_reframed, 0)
 
             self.image_tensor = tf.get_default_graph().get_tensor_by_name("image_tensor:0")
 
@@ -48,40 +48,7 @@ class Detector(InferenceBase):
         if "detection_masks" in output_dict:
             output_dict["detection_masks"] = output_dict["detection_masks"][0]
 
-        detections = {}
-        total_d = 0
-        #Temporary? metric code
-        for idx, detection in enumerate(output_dict["detection_scores"]):
-            if detection > 0.5:
-                total_d += 1
-                det_class = output_dict["detection_classes"][idx]
-                det_name = self.category_index.get(det_class)["name"]
-                if det_name not in detections:
-                    detections[det_name] = 1
-                else:
-                    detections[det_name] += 1
-
-        print("total_d: " + str(total_d))
-        for i in range(0, total_d):
-            cv2.imwrite("output/" + str(i) + "-mask.png", output_dict["detection_masks"][i])
-
-        m = output_dict.pop("detection_masks")
-        np.save("output/test.npy", output_dict)
-        #np.save("output/mask.npy", m)
-
-        asd = np.load("output/test.npy")
-
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            image,
-            asd.item().get("detection_boxes"),
-            asd.item().get("detection_classes"),
-            asd.item().get("detection_scores"),
-            self.category_index,
-            instance_masks=asd.item().get("detection_masks"),
-            use_normalized_coordinates=True,
-            line_thickness=4)
-
-        return detections
+        return output_dict
 
     def run_inference(self, image):
         with self.inference_graph.as_default():
