@@ -5,6 +5,7 @@ from metrics import Metrics
 
 import os
 #os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 #Class that handles video loading, selecting frames,
 #and saving them as separate images in disk
@@ -33,7 +34,8 @@ class Framepicker:
             self.vidcap = cv2.VideoCapture(filename)
             #Isolate filename from path and extension (COMPLETE junk, redo)
             filename = filename.split(".")[0]
-            self.vidname = filename.split("/")[2]
+            self.vidname = filename.split("/")[-1]
+            self.dir = self.dir + self.vidname + "/"
         else:
             self.vidcap = video
             self.vidname = vidname
@@ -67,6 +69,10 @@ class Framepicker:
                 endframe = self.metadata[section][1]
 
             infer.setup_session(self.vidinfo)
+
+            #Convert msec interval to frames
+            interval = int((self.vidinfo["fps"] / 1000) * interval)
+
             #Then loop through each section with a step value of the interval given
             for i in range(startframe, endframe, interval):
                 self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, i)
@@ -91,6 +97,11 @@ class Framepicker:
                 
                 metric.add_detection(i, detections)
 
+                with open("output/" + self.vidname + ".mp4.txt", "w") as f:
+                    f.write(str(metric.frames_with_detections / metric.total_frames))
+
+                os.makedirs(os.path.dirname(self.dir), exist_ok=True)
+
                 self.save_data(output_dict, self.vidname + "-frame-" + str(i) + ".npy", total_d)
 
                 self.save_frame(frame, self.vidname + "-frame-" + str(i) + "." + self.imex)
@@ -105,11 +116,12 @@ class Framepicker:
         cv2.imwrite(self.dir + filename, frame)
 
     def save_data(self, dic, filename, total_d):
-        m = dic.pop("detection_masks")
-        eh = m[0:total_d]
-        dic["detection_masks"] = eh
+        if "detection_masks" in dic:
+            m = dic.pop("detection_masks")
+            eh = m[0:total_d]
+            dic["detection_masks"] = eh
         np.save(self.dir + filename, dic)
-
+"""
 #Test
 d = Detector()
 d.load_graph(d.graph_name)
@@ -118,57 +130,5 @@ d.load_labels(d.label_name)
 x = Framepicker()
 x.load_metadata()
 if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(1920, d)
-
-"""
-#Big test
-
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-if x.load_video("Test data/Relevance test/maybe_relevant.mp4"):
-    x.pick_frames(24, d)
-
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-print("minor_relevance.mp4:")
-if x.load_video("Test data/Relevance test/minor_relevance.mp4"):
-    x.pick_frames(24, d)
-
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-print("minor_relevance_2.mp4:")
-if x.load_video("Test data/Relevance test/minor_relevance_2.mp4"):
-    x.pick_frames(24, d)
-
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-print("not_relevant.mp4:")
-if x.load_video("Test data/Relevance test/not_relevant.mp4"):
-    x.pick_frames(24, d)
-
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-print("relevant.mp4:")
-if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(24, d)
+    x.pick_frames(1000, d)
 """
