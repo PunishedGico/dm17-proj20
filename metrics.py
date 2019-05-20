@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from utils import visualization_utils as vis_util
 
 #Class containing data and functionality related to detection metrics
 class Metrics:
@@ -9,6 +10,8 @@ class Metrics:
         self.total_frames = 0
         self.total_detections = 0
         self.frames_with_detections = 0
+
+        #self.category_index = label_map_util.create_category_index_from_labelmap("mask_rcnn.pbtxt", use_display_name=True)
 
     def add_detection(self, frame_num, det_classes):
         self.total_frames += 1
@@ -48,8 +51,8 @@ class Metrics:
         cv2.putText(asd, "Relevance: " + str(r), (0,30), font, 0.5, (255,255,255))
         
         return asd
-    
-    def add_visualisation(self, filename, interval, vidinfo):
+
+    def add_visualisation(self, filename, interval, vidinfo, cat):
         vis = self.visualise(interval, vidinfo)
         
         for frame in self.frames:
@@ -62,6 +65,34 @@ class Metrics:
             f = filename + str(pos) + ".jpg"
             print("Adding visualisation to: " + f)
             img = cv2.imread(f)
+
+            output_dict = self.load_data(filename, pos)
+            self.draw_boxes(img, output_dict)
+
+            """
+            vis_util.visualize_boxes_and_labels_on_image_array(
+                img,
+                output_dict.item().get("detection_boxes"),
+                output_dict.item().get("detection_classes"),
+                output_dict.item().get("detection_scores"),
+                cat,
+                instance_masks=output_dict.item().get("detection_masks"),
+                use_normalized_coordinates=True,
+                line_thickness=4)
+            """
             img[h-40:h, 0:0+w] = vis
-            cv2.line(img, (asd,h-40), (asd,h), (255,0,0), 1)
+            cv2.line(img, (asd,h-40), (asd,h), (0,0,255), 1)
             cv2.imwrite(f, img)
+
+    def draw_boxes(self, image, output_dict):
+        #for bb in output_dict.item().get("detection_boxes"):
+        #    cv2.rectangle(image, (int(1920*bb[1]),int(1080*bb[0])), (int(1920*bb[3]),int(1080*bb[2])), (255,255,255,255), 1)
+
+        for idx, bb in enumerate(output_dict.item().get("detection_boxes")):
+            if output_dict.item().get("detection_scores")[idx] > 0.5:
+                cv2.rectangle(image, (int(1920*bb[1]),int(1080*bb[0])), (int(1920*bb[3]),int(1080*bb[2])), (255,255,255,255), 1)
+        
+
+    def load_data(self, filename, pos):
+        out = np.load(filename + str(pos) + ".npy")
+        return out
