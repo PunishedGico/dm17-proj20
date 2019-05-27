@@ -121,7 +121,7 @@ class Framepicker:
             eh = m[0:total_d]
             dic["detection_masks"] = eh
         np.save(self.dir + filename, dic)
-"""
+
 #Test
 d = Detector()
 d.load_graph(d.graph_name)
@@ -130,5 +130,4 @@ d.load_labels(d.label_name)
 x = Framepicker()
 x.load_metadata()
 if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(1000, d)
-"""
+    x.pick_frames(60000, d)
