@@ -4,7 +4,7 @@ from detector import Detector
 from metrics import Metrics
 
 import os
-#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 #Class that handles video loading, selecting frames,
@@ -130,4 +130,4 @@ d.load_labels(d.label_name)
 x = Framepicker()
 x.load_metadata()
 if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(60000, d)
+    x.pick_frames(12000, d)
