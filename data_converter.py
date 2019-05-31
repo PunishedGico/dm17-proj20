@@ -1,4 +1,5 @@
 import xml.etree.cElementTree as ET
+import os
 
 import numpy as np
 
@@ -7,10 +8,12 @@ class DataConverter():
         self.data = None
         self.width = 1920
         self.height = 1080
-        self.source_img = "C:/Users/GICO/Documents/dm17-proj20/output/relevant-frame-1920.jpg"
+        self.source_img = ""
 
     def load_npy(self, filename):
-        self.data = np.load(filename)
+        self.source_img = os.getcwd() + "\\" + filename.split(".")[0] + ".jpg"
+        num = np.load(filename)
+        self.data = num.item()
     
     def load_pascalvoc(self):
         pass
@@ -27,13 +30,14 @@ class DataConverter():
         ET.SubElement(size, "depth").text = str(3)
 
         #Objects
-        for idx, bb in enumerate(self.data.item().get("detection_boxes")):
-            if(self.data.item().get("detection_scores")[idx] > 0.5):
+        for idx, bb in enumerate(self.data["detection_boxes"]):
+            if(self.data["detection_scores"][idx] > 0.5):
                 obj = ET.SubElement(annotation, "object")
-                ET.SubElement(obj, "name").text = str(self.data.item().get("detection_classes")[idx]) #Name?
+                ET.SubElement(obj, "name").text = str(self.data["detection_classes"][idx]) #Name?
                 ET.SubElement(obj, "pose").text = "Unspecified"
                 ET.SubElement(obj, "truncated").text = "0"
                 ET.SubElement(obj, "difficult").text = "0"
+
                 box = ET.SubElement(obj, "bndbox")
                 ET.SubElement(box, "xmin").text = str(int(bb[1] * self.width))
                 ET.SubElement(box, "ymin").text = str(int(bb[0] * self.height))
@@ -42,8 +46,4 @@ class DataConverter():
 
         #Create tree and save to disk
         tree = ET.ElementTree(annotation)
-        tree.write("test.xml")
-
-test = DataConverter()
-test.load_npy("test.npy")
-test.save_pascalvoc("test.xml")
+        tree.write(filename)
