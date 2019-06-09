@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-pad = 0
+import data_converter
 ignore = (0, 0, 0)
 
 def mask_to_bb(mask):
