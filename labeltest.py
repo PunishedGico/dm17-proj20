@@ -1,6 +1,11 @@
+from tkinter import filedialog
 from tkinter import *
 import PIL
 from PIL import Image, ImageTk, ImageDraw
+import numpy as np
+import data_converter
+
+colours = [(255,0,125), (252,252,0), (255,217,131), (255,254,239)]
 
 class Window(Frame):
     def __init__(self, master=None):
@@ -32,10 +37,8 @@ class Window(Frame):
         edit.add_command(label="Undo")
         menu.add_cascade(label="Edit", menu=edit)
         
-        label_list = Listbox(self.master, width=40)
-        label_list.insert(END, "This is a label")
-        label_list.insert(END, "This is another label")
-        label_list.grid(row=0, column=2, sticky=N+E+S)
+        self.label_list = Listbox(self.master, width=40)
+        self.label_list.grid(row=0, column=2, sticky=N+E+S)
         
         file_list = Listbox(self.master, width=40)
         file_list.insert(END, "This is a file")
@@ -47,11 +50,6 @@ class Window(Frame):
         class_list.grid(row=1, column=0, sticky=S+W+N)
         
         self.image_view = Canvas(root)
-        self.original_image = Image.open("test.jpg")
-        self.img = ImageTk.PhotoImage(self.original_image)
-        wat = self.image_view.create_image(0,0,image=self.img, anchor=NW)
-        self.image_view.image = self.img
-        self.image_view.grid(row=0, column=1, rowspan=2, sticky=S+W+N+E)
 
         self.image_view.bind("<Configure>", self.resize_image)
         self.image_view.bind("<Motion>", self.mouse_move)
@@ -62,8 +60,12 @@ class Window(Frame):
 
     def redraw_shapes(self, img):
         draw = ImageDraw.Draw(self.resized_image)
-        draw.rectangle((0.47*self.resized_image.width,0.2*self.resized_image.height,0.56*self.resized_image.width,0.4*self.resized_image.height), outline=(0,255,0), width=2)
-        draw.rectangle((self.mouse_x - self.x_off, self.mouse_y - self.y_off, self.mouse_x+10-self.x_off, self.mouse_y+10-self.y_off), fill=256)
+
+        for idx, bb in enumerate(self.detection_data["detection_boxes"]):
+            if self.detection_data["detection_scores"][idx] > 0.5:
+                draw.rectangle((bb[1]*self.resized_image.width,bb[0]*self.resized_image.height,bb[3]*self.resized_image.width,bb[2]*self.resized_image.height), outline=colours[int(self.detection_data["detection_classes"][idx])], width=2)
+
+        #draw.rectangle((self.mouse_x - self.x_off, self.mouse_y - self.y_off, self.mouse_x+10-self.x_off, self.mouse_y+10-self.y_off), fill=256)
 
     def draw_image(self):
         self.resized_image = self.original_image.copy().resize((self.new_w, self.new_h))
@@ -94,10 +96,24 @@ class Window(Frame):
         self.draw_image()
         
     def open_dialogue(self):
-        pass
+        self.filename = filedialog.askopenfilename(title="Select file", filetypes=(("numpy files","*.npy"),("all files","*.*")))
+        self.detection_data = np.load(self.filename).item()
+
+        self.original_image = Image.open(self.filename.split(".")[0] + ".jpg")
+        self.img = ImageTk.PhotoImage(self.original_image)
+        
+        wat = self.image_view.create_image(0,0,image=self.img, anchor=NW)
+        self.image_view.image = self.img
+        self.image_view.grid(row=0, column=1, rowspan=2, sticky=S+W+N+E)
+
+        for idx, bb in enumerate(self.detection_data["detection_boxes"]):
+            if self.detection_data["detection_scores"][idx] > 0.5:
+                self.label_list.insert(END, self.detection_data["detection_classes"][idx])
 
     def save_dialogue(self):
-        pass
+        dc = data_converter.DataConverter()
+        dc.load_npy(self.filename)
+        dc.save_pascalvoc(self.filename.split(".")[0] + ".xml")
 
     def client_exit(self):
         exit()

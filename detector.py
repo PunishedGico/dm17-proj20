@@ -5,7 +5,7 @@ import cv2
 class Detector(InferenceBase):
     def __init__(self):
         super().__init__()
-        self.graph_name = "nmask.pb"
+        self.graph_name = "24b32641s.pb"
         self.label_name = "mask_rcnn.pbtxt"
 
     def setup_session(self, vidinfo):
