@@ -4,7 +4,7 @@ from detector import Detector
 from metrics import Metrics
 
 import os
-#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 #Class that handles video loading, selecting frames,
@@ -121,13 +121,3 @@ class Framepicker:
             eh = m[0:total_d]
             dic["detection_masks"] = eh
         np.save(self.dir + filename, dic)
-
-#Test
-d = Detector()
-d.load_graph(d.graph_name)
-d.load_labels(d.label_name)
-
-x = Framepicker()
-x.load_metadata()
-if x.load_video("Test data/Relevance test/relevant.mp4"):
-    x.pick_frames(1, d)
