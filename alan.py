@@ -42,7 +42,7 @@ class Alan():
 
             return return_list
         else:
-            print("Error:" + r.status_code)
+            print("Error:" + str(r.status_code))
             return None
 
     def download_video(self, url, force=False):
@@ -57,7 +57,7 @@ class Alan():
                 
                 return "Test Data/Alan/" + filename
             else:
-                print("Error:" + r.status_code)
+                print("Error:" + str(r.status_code))
                 return None
         else:
             return "Test Data/Alan/" + url.split("/")[-1]

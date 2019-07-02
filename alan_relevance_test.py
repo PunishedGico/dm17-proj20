@@ -11,7 +11,7 @@ a = Alan()
 video_list = a.get_all_videos()
 
 for v in video_list:
-    filename = a.download_video(v)
+    filename = a.download_video(v, force=True)
     
     d = Detector()
     d.load_graph(d.graph_name)
