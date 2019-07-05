@@ -1,6 +1,6 @@
-#Pixel Annotation Tool 13.2 label guide
+# Pixel Annotation Tool 13.2 label guide
 
-##Download og setup
+## Download og setup
 
 Download Pixel Annotation Tool
 https://github.com/abreheret/PixelAnnotationTool/releases/tag/v1.3.2
@@ -13,6 +13,8 @@ Placer alle billeder der skal labeles i en mappe og åben denne mappe i Pixel An
 Tick Watershed Mask checkboxen in nederste venstre hjørne.
 
 ![asd](img/Setup.JPG)
+
+## Labeling
 
 Vælg det første billede i listen til højre.
 Tegn labels på de forskellige ting i billedet der skal labeles.
