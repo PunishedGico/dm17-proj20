@@ -30,3 +30,7 @@ Bliv ved med at tegne void indtil maskerne passer.
 Vælg File -> Save current image (eller hotkey Ctrl + S). Der skulle nu være 3 nye filer i billed mappen *_color_mask.png, *_mask.png, *_watershed_mask.png
 
 color_mask burde se sådan ud.
+
+![asd](img/1_color_mask.png)
+
+Done!
