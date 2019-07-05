@@ -20,7 +20,12 @@ Tegn labels på de forskellige ting i billedet der skal labeles.
 ![asd](img/Label.JPG)
 
 Marker baggrund med "void" og tryk på Watershed knappen.
+
+![asd](img/2.png)
+
 Bliv ved med at tegne void indtil maskerne passer.
+
+![asd](img/4.png)
 
 Vælg File -> Save current image (eller hotkey Ctrl + S). Der skulle nu være 3 nye filer i billed mappen *_color_mask.png, *_mask.png, *_watershed_mask.png
 
