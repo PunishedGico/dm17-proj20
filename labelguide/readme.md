@@ -5,7 +5,7 @@
 Download Pixel Annotation Tool
 https://github.com/abreheret/PixelAnnotationTool/releases/tag/v1.3.2
 
-Download [docks.json](/docks.json) og læg den i Pixel Annotation Tool mappen.
+Download [docks.json](labelguide/docks.json) og læg den i Pixel Annotation Tool mappen.
 
 Åben Pixel Annotation Tool og vælg Tool -> Open config file i menu baren. Åben docks.json.
 
