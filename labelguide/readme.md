@@ -33,4 +33,4 @@ color_mask burde se sådan ud.
 
 ![asd](img/1_color_mask.png)
 
-Done!
+Gentag indtil alle billeder er labeled.
