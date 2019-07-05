@@ -17,6 +17,8 @@ Tick Watershed Mask checkboxen in nederste venstre hjørne.
 Vælg det første billede i listen til højre.
 Tegn labels på de forskellige ting i billedet der skal labeles.
 
+![asd](img/Label.JPG)
+
 Marker baggrund med "void" og tryk på Watershed knappen.
 Bliv ved med at tegne void indtil maskerne passer.
 
