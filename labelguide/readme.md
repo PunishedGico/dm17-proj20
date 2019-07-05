@@ -12,6 +12,8 @@ Download docks.json og læg den i Pixel Annotation Tool mappen.
 Placer alle billeder der skal labeles i en mappe og åben denne mappe i Pixel Annotation Tool ved File -> Open directory.
 Tick Watershed Mask checkboxen in nederste venstre hjørne.
 
+![asd](img/Setup.JPG)
+
 Vælg det første billede i listen til højre.
 Tegn labels på de forskellige ting i billedet der skal labeles.
 
