@@ -1,0 +1,103 @@
+{
+    "labels": {
+        "void": {
+            "categorie": "void",
+            "color": [
+                0,
+                0,
+                0
+            ],
+            "id": 1,
+            "id_categorie": 1,
+            "name": "void"
+        },
+        "bollard": {
+            "categorie": "construction",
+            "color": [
+                0,
+                255,
+                125
+            ],
+            "id": 2,
+            "id_categorie": 1,
+            "name": "bollard"
+        },
+        "ladder": {
+            "categorie": "construction",
+            "color": [
+                252,
+                252,
+                0
+            ],
+            "id": 3,
+            "id_categorie": 1,
+            "name": "ladder"
+        },
+        "brokenwood": {
+            "categorie": "construction",
+            "color": [
+                217,
+                255,
+                131
+            ],
+            "id": 4,
+            "id_categorie": 1,
+            "name": "broken wood"
+        },
+        "rope": {
+            "categorie": "construction",
+            "color": [
+                254,
+                255,
+                239
+            ],
+            "id": 5,
+            "id_categorie": 1,
+            "name": "rope"
+        },
+        "1": {
+            "categorie": "construction",
+            "color": [
+                0,
+                255,
+                255
+            ],
+            "id": 6,
+            "id_categorie": 1,
+            "name": "1"
+        },
+        "2": {
+            "categorie": "construction",
+            "color": [
+                255,
+                0,
+                0
+            ],
+            "id": 7,
+            "id_categorie": 1,
+            "name": "2"
+        },
+        "3": {
+            "categorie": "construction",
+            "color": [
+                0,
+                0,
+                255
+            ],
+            "id": 8,
+            "id_categorie": 1,
+            "name": "3"
+        },
+        "4": {
+            "categorie": "construction",
+            "color": [
+                255,
+                0,
+                255
+            ],
+            "id": 9,
+            "id_categorie": 1,
+            "name": "4"
+        }
+    }
+}
