@@ -18,6 +18,7 @@ Tick Watershed Mask checkboxen in nederste venstre hjørne.
 
 Vælg det første billede i listen til højre.
 Tegn labels på de forskellige ting i billedet der skal labeles.
+Dette behøves ikke gøres præcist eftersom Watershed tager sig af detaljerne.
 
 ![asd](img/Label.JPG)
 
